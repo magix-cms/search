@@ -1,0 +1,42 @@
+#search {
+	.list_item {
+		border-top: 1px solid #ddd;
+		padding: 15px 0;
+		position: relative;
+
+		h2 {
+			margin-top: 0;
+			padding-bottom: 4px;
+			border-bottom: 1px solid transparent;
+		}
+
+		/*&:last-child {
+			border-bottom: none;
+		}*/
+
+		.figure {
+			display: flex;
+			align-items: center;
+
+			+ div {
+				padding-left: 0;
+			}
+		}
+
+		&:hover {
+			h2 {
+				color: @main-color;
+				border-bottom-color: @main-color;
+			}
+		}
+	}
+
+	.btn-link {
+		.show_more { display: none }
+
+		&.collapsed {
+			.show_less { display: none }
+			.show_more { display: inline }
+		}
+	}
+}
