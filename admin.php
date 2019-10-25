@@ -53,6 +53,8 @@ class plugins_search_admin extends plugins_search_db {
 	protected $controller,
 		$data,
 		$message,
+		$module,
+		$mods,
 		$template;
 
 	/**
@@ -78,6 +80,8 @@ class plugins_search_admin extends plugins_search_db {
 	public function __construct(){
 		$this->template = new backend_model_template();
 		$this->data = new backend_model_data($this);
+		$this->module = new backend_controller_module();
+		$this->mods = $this->module->load_module('search');
 		$this->message = new component_core_message($this->template);
 
 		$formClean = new form_inputEscape();
@@ -173,6 +177,14 @@ class plugins_search_admin extends plugins_search_db {
 						}
 						catch (Exception $e) {
 							$this->message->json_post_response(false, 'error','Exception reçue : '.$e->getMessage());
+						}
+
+						if(!empty($this->mods)) {
+							foreach ($this->mods as $name => $mod) {
+								if(method_exists($mod,'toggle_fulltext')) {
+									$mod->toggle_fulltext($this->search['fulltext'] ? 1 : 0);
+								}
+							}
 						}
 					}
 					break;

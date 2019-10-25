@@ -20,14 +20,17 @@ class plugins_search_db
 							FROM mc_about_page AS p 
 							LEFT JOIN mc_about_page_content AS pc USING(id_pages)
 							LEFT JOIN mc_lang as lg USING(id_lang)
-							WHERE lg.iso_lang = :lang AND pc.name_pages LIKE :needle";
+							WHERE lg.iso_lang = :lang 
+							AND pc.published_pages = 1
+							AND pc.name_pages LIKE :needle";
 					break;
 				case 'ft_about':
 					$sql = "SELECT * 
 							FROM mc_about_page AS p 
 							LEFT JOIN mc_about_page_content AS pc USING(id_pages)
 							LEFT JOIN mc_lang as lg USING(id_lang)
-							WHERE lg.iso_lang = :lang
+							WHERE lg.iso_lang = :lang 
+							AND pc.published_pages = 1
 							AND (
 							  	pc.name_pages LIKE :name_needle
 								OR MATCH (pc.content_pages)
@@ -39,7 +42,9 @@ class plugins_search_db
 							FROM mc_cms_page AS p 
 							LEFT JOIN mc_cms_page_content AS pc USING(id_pages)
 							LEFT JOIN mc_lang as lg USING(id_lang)
-							WHERE lg.iso_lang = :lang AND pc.name_pages LIKE :needle";
+							WHERE lg.iso_lang = :lang 
+							AND pc.published_pages = 1
+							AND pc.name_pages LIKE :needle";
 					break;
 				case 'ft_pages':
 					$sql = "SELECT * 
@@ -47,6 +52,7 @@ class plugins_search_db
 							LEFT JOIN mc_cms_page_content AS pc USING(id_pages)
 							LEFT JOIN mc_lang as lg USING(id_lang)
 							WHERE lg.iso_lang = :lang 
+							AND pc.published_pages = 1
 							AND (
 							  	pc.name_pages LIKE :name_needle
 								OR MATCH (pc.content_pages)
@@ -58,14 +64,17 @@ class plugins_search_db
 							FROM mc_catalog_cat AS p 
 							LEFT JOIN mc_catalog_cat_content AS pc USING(id_cat)
 							LEFT JOIN mc_lang as lg USING(id_lang)
-							WHERE lg.iso_lang = :lang AND pc.name_cat LIKE :needle";
+							WHERE lg.iso_lang = :lang 
+							AND pc.published_cat = 1
+						  	AND pc.name_cat LIKE :needle";
 					break;
 				case 'ft_categories':
 					$sql = "SELECT * 
 							FROM mc_catalog_cat AS p 
 							LEFT JOIN mc_catalog_cat_content AS pc USING(id_cat)
 							LEFT JOIN mc_lang as lg USING(id_lang)
-							WHERE lg.iso_lang = :lang
+							WHERE lg.iso_lang = :lang 
+							AND pc.published_cat = 1
 							AND (
 							  	pc.name_cat LIKE :name_needle
 								OR MATCH (pc.content_cat)
@@ -73,18 +82,74 @@ class plugins_search_db
 							)";
 					break;
 				case 'products':
-					$sql = "SELECT * 
-							FROM mc_catalog_product AS p 
-							LEFT JOIN mc_catalog_product_content AS pc USING(id_product)
-							LEFT JOIN mc_lang as lg USING(id_lang)
-							WHERE lg.iso_lang = :lang AND pc.name_p LIKE :needle";
-					break;
-				case 'ft_products':
-					$sql = "SELECT * 
-							FROM mc_catalog_product AS p 
+					$sql = "SELECT 
+								catalog.* ,
+								cat.name_cat, 
+								cat.url_cat, 
+								p.*, 
+								pc.name_p, 
+								pc.longname_p, 
+								pc.resume_p, 
+								pc.content_p, 
+								pc.url_p, 
+								pc.id_lang,
+								lg.iso_lang, 
+								pc.last_update, 
+								img.name_img,
+								COALESCE(imgc.alt_img, pc.longname_p, pc.name_p) as alt_img,
+								COALESCE(imgc.title_img, imgc.alt_img, pc.longname_p, pc.name_p) as title_img,
+								COALESCE(imgc.caption_img, imgc.title_img, imgc.alt_img, pc.longname_p, pc.name_p) as caption_img,
+								pc.seo_title_p,
+								pc.seo_desc_p
+						FROM mc_catalog AS catalog
+						JOIN mc_catalog_cat AS c ON ( catalog.id_cat = c.id_cat )
+						JOIN mc_catalog_cat_content AS cat ON ( c.id_cat = cat.id_cat )
+						JOIN mc_catalog_product AS p ON ( catalog.id_product = p.id_product )
+						JOIN mc_catalog_product_content AS pc ON ( p.id_product = pc.id_product )
+						LEFT JOIN mc_catalog_product_img AS img ON (p.id_product = img.id_product AND img.default_img = 1)
+						LEFT JOIN mc_catalog_product_img_content AS imgc ON (imgc.id_img = img.id_img and pc.id_lang = imgc.id_lang)
+						JOIN mc_lang AS lg ON ( pc.id_lang = lg.id_lang ) AND (cat.id_lang = lg.id_lang)
+						WHERE lg.iso_lang = :lang
+						AND pc.published_p = 1
+						AND pc.name_p LIKE :needle";
+					/*$sql = "SELECT *
+							FROM mc_catalog_product AS p
 							LEFT JOIN mc_catalog_product_content AS pc USING(id_product)
 							LEFT JOIN mc_lang as lg USING(id_lang)
 							WHERE lg.iso_lang = :lang
+							AND pc.published_p = 1
+						  	AND pc.name_p LIKE :needle";*/
+					break;
+				case 'ft_products':
+					$sql = "SELECT 
+								catalog.* ,
+								cat.name_cat, 
+								cat.url_cat, 
+								p.*, 
+								pc.name_p, 
+								pc.longname_p, 
+								pc.resume_p, 
+								pc.content_p, 
+								pc.url_p, 
+								pc.id_lang,
+								lg.iso_lang, 
+								pc.last_update, 
+								img.name_img,
+								COALESCE(imgc.alt_img, pc.longname_p, pc.name_p) as alt_img,
+								COALESCE(imgc.title_img, imgc.alt_img, pc.longname_p, pc.name_p) as title_img,
+								COALESCE(imgc.caption_img, imgc.title_img, imgc.alt_img, pc.longname_p, pc.name_p) as caption_img,
+								pc.seo_title_p,
+								pc.seo_desc_p
+							FROM mc_catalog AS catalog
+							JOIN mc_catalog_cat AS c ON ( catalog.id_cat = c.id_cat )
+							JOIN mc_catalog_cat_content AS cat ON ( c.id_cat = cat.id_cat )
+							JOIN mc_catalog_product AS p ON ( catalog.id_product = p.id_product )
+							JOIN mc_catalog_product_content AS pc ON ( p.id_product = pc.id_product )
+							LEFT JOIN mc_catalog_product_img AS img ON (p.id_product = img.id_product AND img.default_img = 1)
+							LEFT JOIN mc_catalog_product_img_content AS imgc ON (imgc.id_img = img.id_img and pc.id_lang = imgc.id_lang)
+							JOIN mc_lang AS lg ON ( pc.id_lang = lg.id_lang ) AND (cat.id_lang = lg.id_lang)
+							WHERE lg.iso_lang = :lang
+							AND pc.published_p = 1
 							AND (
 							  	pc.name_p LIKE :name_needle
 								OR MATCH (pc.content_p)
@@ -96,14 +161,17 @@ class plugins_search_db
 							FROM mc_news AS p 
 							LEFT JOIN mc_news_content AS pc USING(id_news)
 							LEFT JOIN mc_lang as lg USING(id_lang)
-							WHERE lg.iso_lang = :lang AND pc.name_news LIKE :needle";
+							WHERE lg.iso_lang = :lang 
+							AND pc.published_news = 1
+							AND pc.name_news LIKE :needle";
 					break;
 				case 'ft_news':
 					$sql = "SELECT * 
 							FROM mc_news AS p 
 							LEFT JOIN mc_news_content AS pc USING(id_news)
 							LEFT JOIN mc_lang as lg USING(id_lang)
-							WHERE lg.iso_lang = :lang
+							WHERE lg.iso_lang = :lang 
+							AND pc.published_news = 1
 							AND (
 							  	pc.name_news LIKE :name_needle
 								OR MATCH (pc.content_news)

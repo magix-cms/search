@@ -46,11 +46,11 @@
  * @name plugins_advantage_public
  * Le plugin advantage
  */
-class plugins_search_public extends plugins_search_db{
+class plugins_search_public extends plugins_search_db {
     /**
      * @var object
      */
-    protected $template, $data, $lang;
+    protected $template, $data, $lang, $module, $mods;
 
 	/**
 	 * @var string
@@ -65,6 +65,8 @@ class plugins_search_public extends plugins_search_db{
 		$this->template = $t ? $t : new frontend_model_template();
 		$this->data = new frontend_model_data($this);
 		$this->lang = $this->template->lang;
+		$this->module = new frontend_model_module();
+		$this->mods = $this->module->load_module('search');
 		$formClean = new form_inputEscape();
 
 		if(http_request::isGet('query')) $this->query = $formClean->simpleClean($_GET['query']);
@@ -111,6 +113,29 @@ class plugins_search_public extends plugins_search_db{
 	}
 
 	/**
+	 * @param $arr
+	 * @return bool
+	 */
+	private function is_array_empty($arr)
+	{
+		$Result = true;
+
+		if (is_array($arr) && count($arr) > 0)
+		{
+			foreach ($arr as $Value)
+			{
+				$Result = $Result && $this->is_array_empty($Value);
+			}
+		}
+		else
+		{
+			$Result = empty($arr);
+		}
+
+		return $Result;
+	}
+
+	/**
 	 *
 	 */
 	public function run()
@@ -133,34 +158,43 @@ class plugins_search_public extends plugins_search_db{
 				);
 			}
 
-			$results['about'] = ($modules['about']) ? $this->getItems(($config['fulltext_search'] ? 'ft_':'').'about',$params,'all',false) : null;
-			$results['pages'] = ($modules['pages']) ? $this->getItems(($config['fulltext_search'] ? 'ft_':'').'pages',$params,'all',false) : null;
-			$results['categories'] = ($modules['catalog']) ? $this->getItems(($config['fulltext_search'] ? 'ft_':'').'categories',$params,'all',false) : null;
-			$results['products'] = ($modules['catalog']) ? $this->getItems(($config['fulltext_search'] ? 'ft_':'').'products',$params,'all',false) : null;
-			$results['news'] = ($modules['news']) ? $this->getItems(($config['fulltext_search'] ? 'ft_':'').'news',$params,'all',false) : null;
+			$results['s_about'] = ($modules['about']) ? $this->getItems(($config['fulltext_search'] ? 'ft_':'').'about',$params,'all',false) : null;
+			$results['s_pages'] = ($modules['pages']) ? $this->getItems(($config['fulltext_search'] ? 'ft_':'').'pages',$params,'all',false) : null;
+			$results['s_categories'] = ($modules['catalog']) ? $this->getItems(($config['fulltext_search'] ? 'ft_':'').'categories',$params,'all',false) : null;
+			$results['s_products'] = ($modules['catalog']) ? $this->getItems(($config['fulltext_search'] ? 'ft_':'').'products',$params,'all',false) : null;
+			$results['s_news'] = ($modules['news']) ? $this->getItems(($config['fulltext_search'] ? 'ft_':'').'news',$params,'all',false) : null;
 
-			if($results['about']) {
+			if($results['s_about']) {
 				$modelAbout = new frontend_model_about();
-				$results['about'] = $this->setItems($results['about'],$modelAbout);
+				$results['s_about'] = $this->setItems($results['s_about'],$modelAbout);
 			}
-			if($results['pages']) {
+			if($results['s_pages']) {
 				$modelPages = new frontend_model_pages();
-				$results['pages'] = $this->setItems($results['pages'],$modelPages);
+				$results['s_pages'] = $this->setItems($results['s_pages'],$modelPages);
 			}
-			if($results['categories']) {
+			if($results['s_categories']) {
 				$modelCategories = new frontend_model_catalog();
-				$results['categories'] = $this->setItems($results['categories'],$modelCategories);
+				$results['s_categories'] = $this->setItems($results['s_categories'],$modelCategories);
 			}
-			if($results['products']) {
+			if($results['s_products']) {
 				$modelProducts = new frontend_model_catalog();
-				$results['products'] = $this->setItems($results['products'],$modelProducts);
+				$results['s_products'] = $this->setItems($results['s_products'],$modelProducts);
 			}
-			if($results['news']) {
+			if($results['s_news']) {
 				$modelNews = new frontend_model_news();
-				$results['news'] = $this->setItems($results['news'],$modelNews);
+				$results['s_news'] = $this->setItems($results['s_news'],$modelNews);
 			}
 
-			if(empty($results['about']) && empty($results['pages']) && empty($results['categories']) && empty($results['products']) && empty($results['news'])) {
+			if(!empty($this->mods)) {
+				foreach ($this->mods as $name => $mod) {
+					if(method_exists($mod,'search')) {
+						$return = $mod->search($params, $config['fulltext_search']);
+						$results = array_merge($results, $return);
+					}
+				}
+			}
+
+			if($this->is_array_empty($results)) {
 				$this->template->assign('msg',sprintf($this->template->getConfigVars('no_result_msg'),$this->query));
 			}
 			$this->template->assign('results',$results);
