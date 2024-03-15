@@ -11,16 +11,28 @@
 	<data>
 		<authors>
 			<author>
+				<name>Gerits Aurelien</name>
+				<website href="http://www.magix-cms.com" />
+			</author>
+			<author>
 				<name>Salvatore Di Salvo</name>
 				<website href="http://www.disalvo-infographiste.be" />
 			</author>
 		</authors>
 		<release>
 			<date_create>29/01/2019</date_create>
-			<date_update>29/01/2019</date_update>
-			<version>0.2.0</version>
+			<date_update>15/03/2024</date_update>
+			<version>1.0</version>
 			<phase>Beta</phase>
 		</release>
+		<bind>
+			<core>
+				<name>product</name>
+			</core>
+			<core>
+				<name>pages</name>
+			</core>
+		</bind>
 		<support>
 			<ticket href="https://github.com/magix-cms/magixcms-3/issues"></ticket>
 			<git href="https://github.com/magix-cms/magixcms-3"></git>

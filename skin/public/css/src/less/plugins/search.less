@@ -1,42 +1,16 @@
+// Compiler options
+@import (reference) "mixins";
+// ------
 #search {
-	.list_item {
-		border-top: 1px solid #ddd;
-		padding: 15px 0;
-		position: relative;
-
-		h2 {
-			margin-top: 0;
-			padding-bottom: 4px;
-			border-bottom: 1px solid transparent;
-		}
-
-		/*&:last-child {
-			border-bottom: none;
-		}*/
-
-		.figure {
+	.search-query{
+		.input-group{
 			display: flex;
-			align-items: center;
-
-			+ div {
-				padding-left: 0;
-			}
-		}
-
-		&:hover {
-			h2 {
-				color: @main-color;
-				border-bottom-color: @main-color;
-			}
 		}
 	}
-
-	.btn-link {
-		.show_more { display: none }
-
-		&.collapsed {
-			.show_less { display: none }
-			.show_more { display: inline }
+	.vignette{
+		h2{
+			font-size: var(--fz-h3);
+			.text-overflow();
 		}
 	}
 }

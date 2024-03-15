@@ -34,17 +34,18 @@
  */
  /**
  * MAGIX CMS
- * @category   advantage
+ * @category   search
  * @package    plugins
- * @copyright  MAGIX CMS Copyright (c) 2008 - 2015 Gerits Aurelien,
+ * @copyright  MAGIX CMS Copyright (c) 2008 - 2024 Gerits Aurelien,
  * http://www.magix-cms.com,  http://www.magix-cjquery.com
  * @license    Dual licensed under the MIT or GPL Version 3 licenses.
- * @version    2.0
+ * @version    1.0
  * Author: Salvatore Di Salvo
+ *  Author: Aurelien Gerits
  * Date: 16-12-15
  * Time: 14:00
- * @name plugins_advantage_admin
- * Le plugin advantage
+ * @name plugins_search_admin
+ * Le plugin search
  */
 class plugins_search_admin extends plugins_search_db {
 	/**

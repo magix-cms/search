@@ -2,6 +2,9 @@
 {block name="title"}{#search_results_for#|sprintf:$needle}{/block}
 {block name="description"}{#search_results_for#|sprintf:$needle}{/block}
 {block name='body:id'}search{/block}
+{block name="styleSheet" nocache}
+    {$css_files = ["form","search"]}
+{/block}
 {block name="webType"}SearchResultsPage{/block}
 {block name='article'}
     <article class="container" itemprop="mainContentOfPage" itemscope itemtype="http://schema.org/WebPageElement">
@@ -13,6 +16,33 @@
                 </p>
             {/if}
             <div class="row row-center">
+            {if $results.s_products}
+            <div class="col-12 col-sm-6 col-md-6">
+                <h3 class="text-center">{#products#|ucfirst}</h3>
+                <div class="vignette-list">
+                    <div class="section-block">
+                        <div class="row">
+                        {include file="catalog/loop/product.tpl" data=$results.s_products classCol='vignette col-12 col-xs-8 col-sm-6' nocache}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/if}
+            {if $results.s_pages}
+            <div class="col-12 col-sm-6 col-md-6">
+                <h3 class="text-center">{#pages#|ucfirst}</h3>
+                <div class="vignette-list">
+                    <div class="section-block">
+                        <div class="row">
+                        {include file="pages/loop/pages.tpl" data=$results.s_pages classCol='vignette col-12 col-xs-8 col-sm-6' nocache}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/if}
+            </div>
+            {*<pre>{print_r($results)}</pre>*}
+            {*<div class="row row-center">
                 {if $results.about}
                 <div class="col-12 col-sm-6 col-md-4">
                     <h3>{#about#|ucfirst}</h3>
@@ -43,12 +73,12 @@
                     </div>
                 </div>
                 {/if}
-                {if $results.products}
+                {if $results.s_products}
                 <div class="col-12 col-sm-6 col-md-4">
                     <h3>{#products#|ucfirst}</h3>
                     <div class="vignette-list">
                         <div class="section-block">
-                            {include file="search/loop/item.tpl" data=$results.products classCol='list_item' section='products'}
+                            {include file="catalog/loop/product.tpl" data=$results.s_products classCol='vignette' nocache}
                         </div>
                     </div>
                 </div>
@@ -63,7 +93,7 @@
                     </div>
                 </div>
                 {/if}
-            </div>
+            </div>*}
         {/block}
     </article>
 {/block}

@@ -102,16 +102,18 @@ class plugins_search_db
 								pc.seo_title_p,
 								pc.seo_desc_p
 						FROM mc_catalog AS catalog
-						JOIN mc_catalog_cat AS c ON ( catalog.id_cat = c.id_cat )
+						JOIN mc_catalog_cat AS c ON ( catalog.id_cat = c.id_cat AND catalog.default_c = 1 )
 						JOIN mc_catalog_cat_content AS cat ON ( c.id_cat = cat.id_cat )
 						JOIN mc_catalog_product AS p ON ( catalog.id_product = p.id_product )
 						JOIN mc_catalog_product_content AS pc ON ( p.id_product = pc.id_product )
+						LEFT JOIN mc_catalog_product_animal AS pa ON ( p.id_product = pa.id_product )
 						LEFT JOIN mc_catalog_product_img AS img ON (p.id_product = img.id_product AND img.default_img = 1)
 						LEFT JOIN mc_catalog_product_img_content AS imgc ON (imgc.id_img = img.id_img and pc.id_lang = imgc.id_lang)
 						JOIN mc_lang AS lg ON ( pc.id_lang = lg.id_lang ) AND (cat.id_lang = lg.id_lang)
 						WHERE lg.iso_lang = :lang
 						AND pc.published_p = 1
-						AND pc.name_p LIKE :needle";
+						AND (pc.name_p LIKE :needle OR pa.city LIKE :town)
+						ORDER BY p.date_register DESC";
 					/*$sql = "SELECT *
 							FROM mc_catalog_product AS p
 							LEFT JOIN mc_catalog_product_content AS pc USING(id_product)
@@ -141,10 +143,11 @@ class plugins_search_db
 								pc.seo_title_p,
 								pc.seo_desc_p
 							FROM mc_catalog AS catalog
-							JOIN mc_catalog_cat AS c ON ( catalog.id_cat = c.id_cat )
+							JOIN mc_catalog_cat AS c ON ( catalog.id_cat = c.id_cat AND catalog.default_c = 1 )
 							JOIN mc_catalog_cat_content AS cat ON ( c.id_cat = cat.id_cat )
 							JOIN mc_catalog_product AS p ON ( catalog.id_product = p.id_product )
 							JOIN mc_catalog_product_content AS pc ON ( p.id_product = pc.id_product )
+						    LEFT JOIN mc_catalog_product_animal AS pa ON ( p.id_product = pa.id_product )
 							LEFT JOIN mc_catalog_product_img AS img ON (p.id_product = img.id_product AND img.default_img = 1)
 							LEFT JOIN mc_catalog_product_img_content AS imgc ON (imgc.id_img = img.id_img and pc.id_lang = imgc.id_lang)
 							JOIN mc_lang AS lg ON ( pc.id_lang = lg.id_lang ) AND (cat.id_lang = lg.id_lang)
@@ -152,9 +155,11 @@ class plugins_search_db
 							AND pc.published_p = 1
 							AND (
 							  	pc.name_p LIKE :name_needle
+							  	OR pa.city LIKE :town
 								OR MATCH (pc.content_p)
         							AGAINST (:content_needle IN NATURAL LANGUAGE MODE)
-							)";
+							)
+							ORDER BY p.date_register DESC";
 					break;
 				case 'news':
 					$sql = "SELECT * 
