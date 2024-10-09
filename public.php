@@ -56,6 +56,10 @@ class plugins_search_public extends plugins_search_db {
 	 * @var string
 	 */
     public $query,$filter;
+    /**
+     * @var string $controller
+     */
+    public string $controller;
 
 	/**
 	 * plugins_search_public constructor.
@@ -142,37 +146,41 @@ class plugins_search_public extends plugins_search_db {
 
 		return $Result;
 	}
-
+    public function extendListProduct(array $data): array {
+        return [];
+    }
     /**
      * @param array $filter
      * @return array
      */
     public function getProductList(array $filter = []): array {
+        if(http_request::isGet('controller')) $this->controller = form_inputEscape::simpleClean($_GET['controller']);
         $extend = [];
-        $config = $this->getItems('search', null, 'one',false);
-        if(http_request::isGet('filter')) $this->filter = form_inputEscape::arrayClean($_GET['filter']);
-        //print_r($this->query);
-        if(isset($filter['query']) && $filter['query'] !== ''){
-            //print_r($filter);
-            if($config['fulltext_search']) {
-                $extend['extendQueryParams']['filter'] = [
-                    [
-                        'type' => 'AND',
-                        'condition' => 'pc.name_p LIKE '.'"%'.$this->filter['query'].'%"'.
-                            ' OR MATCH (pc.content_p)
-                            AGAINST ("'.$this->filter['query'].'" IN NATURAL LANGUAGE MODE)'
-                    ]
-                ];
-            }else {
-                $extend['extendQueryParams']['filter'] = [
-                    [
-                        'type' => 'AND',
-                        'condition' => 'pc.name_p LIKE ' . '"%' . $this->filter['query'] . '%"'
-                    ]
-                ];
+        if(isset($this->controller) && $this->controller == 'search') {
+            $config = $this->getItems('search', null, 'one', false);
+            if (http_request::isGet('filter')) $this->filter = form_inputEscape::arrayClean($_GET['filter']);
+            //print_r($this->query);
+            if (isset($filter['query']) && $filter['query'] !== '') {
+                //print_r($filter);
+                if ($config['fulltext_search']) {
+                    $extend['extendQueryParams']['filter'] = [
+                        [
+                            'type' => 'AND',
+                            'condition' => 'pc.name_p LIKE ' . '"%' . $this->filter['query'] . '%"' .
+                                ' OR MATCH (pc.content_p)
+                            AGAINST ("' . $this->filter['query'] . '" IN NATURAL LANGUAGE MODE)'
+                        ]
+                    ];
+                } else {
+                    $extend['extendQueryParams']['filter'] = [
+                        [
+                            'type' => 'AND',
+                            'condition' => 'pc.name_p LIKE ' . '"%' . $this->filter['query'] . '%"'
+                        ]
+                    ];
+                }
             }
         }
-
         $extend['newRow'] = ['search' => 'search'];
         $extend['collection'] = 'search';
         // print_r($extend);
